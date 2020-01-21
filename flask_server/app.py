@@ -54,7 +54,7 @@ def stream_track(id):
 	title = results[1]
 
 	print(path)
-	file_name = "media/{}_.m3u8".format(str(id))
+	file_name = "media/{}.m3u8".format(str(id))
 	if (not os.path.exists(file_name)):
 		subprocess.call("./segment.sh \"{}\" \"{}\" {}".format(
 			path,
@@ -81,7 +81,7 @@ def stream_track(id):
 		file_name,
 		mimetype='text/plain',
 		as_attachment=True,
-		attachment_filename=title+"_.m3u8"
+		attachment_filename=title+".m3u8"
 	)
 	
 @app.route('/download/album/<int:id>')
