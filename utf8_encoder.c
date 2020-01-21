@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
+#include <stdint.h>
 #include <math.h>
+
 #include "endian.h"
 #include "utf8_encoder.h"
 
@@ -53,10 +53,20 @@ int utf8_byte_size(int codepoint) {
 	return num_bytes;
 }
 
+struct utf8_string* get_empty_utf8_string() {
+	struct utf8_string* string = malloc(sizeof(struct utf8_string));
+	string->data = malloc(1);
+	string->data[0] = '\0';		
+	string->length = 0;
+	string->size = 1;
+	return string;
+}
 
 struct utf8_string* ucs2_to_utf8_wbom(char* ucs2, int size, bool endian) {
 	//dont allow odd sized char arrays
-	if (size%2 == 1) return NULL;
+	//edit: errorneously coded odd-sized ucs2 char arrays do occur,
+	//so handle them....awesome
+	if (size%2 == 1 || size == 0) return get_empty_utf8_string();
 
 	struct utf8_string* string = malloc(sizeof(struct utf8_string));
 	//char* utf8_string = NULL;
@@ -96,7 +106,9 @@ struct utf8_string* ucs2_to_utf8_wbom(char* ucs2, int size, bool endian) {
 
 struct utf8_string* ucs2_to_utf8(char* ucs2, int size) {
 	//must have at least 2 bytes
-	if (size < 2) return NULL;
+	//apparently, zero-length ucs2 strings can be written with the bom, so
+	//that's cool
+	if (size < 2) return get_empty_utf8_string();
 
 	bool endian;
 	//check BOM
@@ -106,7 +118,7 @@ struct utf8_string* ucs2_to_utf8(char* ucs2, int size) {
 	else if ((unsigned char)ucs2[0] == 0xfe && (unsigned char)ucs2[1] == 0xff) {
 		endian = BIG_ENDIAN_;
 	}
-	else return NULL;
+	else return get_empty_utf8_string();
 
 	//increment pointer to start after BOM, adjust size and specify endianness
 	struct utf8_string* s = ucs2_to_utf8_wbom(ucs2+2,size-2,endian);

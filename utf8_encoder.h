@@ -1,6 +1,8 @@
 #ifndef UTF8ENCODER
 #define UTF8ENCODER
 
+#include <stdbool.h>
+
 struct utf8_string {
 	char* data;
 	int length;
